@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Wishlist</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        h2 {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .product-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-card img {
+            border-radius: 8px;
+            max-height: 150px;
+            margin-bottom: 15px;
+        }
+
+        .product-card h5 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+
+        .product-card p {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #28a745;
+            margin: 10px 0;
+        }
+
+        .wishlist-btn {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 1.5rem;
+            color: #dc3545;
+            cursor: pointer;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .wishlist-btn:hover {
+            color: #bd2130;
+            transform: scale(1.2);
+        }
+
+        .wishlist-btn i.filled {
+            color: #dc3545;
+        }
+
+        .wishlist-empty {
+            font-size: 1.2rem;
+            text-align: center;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Your Wishlist</h2>
+        <div class="row" id="wishlist-container">
+            {% for item in wishlist_items %}
+                <div class="col-md-4" id="product-{{ item.product.id }}">
+                    <div class="product-card">
+                        <img src="{{ item.product.imageURL }}" alt="{{ item.product.name }}" class="img-fluid">
+                        <h5>{{ item.product.name }}</h5>
+                        <p>${{ item.product.price }}</p>
+                        <a href="javascript:void(0);" onclick="toggleWishlist({{ item.product.id }})" class="wishlist-btn" data-id="{{ item.product.id }}">
+                            <i class="fas fa-heart {% if item.product in user.wishlist_set.all %}filled{% endif %}"></i>
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <p class="wishlist-empty" id="empty-message">Your wishlist is empty.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        async function toggleWishlist(productId) {
+    const icon = document.querySelector(`.wishlist-btn[data-id="${productId}"] i`);
+    const card = document.getElementById(`product-${productId}`);
+    const emptyMessage = document.getElementById('empty-message');
+    
+    const isFilled = icon.classList.contains('filled');
+    icon.classList.toggle('filled');
+
+    try {
+        const response = await fetch(`/wishlist/toggle/${productId}/`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'added') {
+            icon.classList.add('filled');
+            Swal.fire({
+                icon: 'success',
+                title: 'Added to Wishlist',
+                text: 'Product has been added to your wishlist!',
+                timer: 2000,
+                showConfirmButton: false,
+            });
+        } else if (data.status === 'removed') {
+            icon.classList.remove('filled');
+            card.remove();
+
+            Swal.fire({
+                icon: 'info',
+                title: 'Removed from Wishlist',
+                text: 'Product has been removed from your wishlist.',
+                timer: 2000,
+                showConfirmButton: false,
+            });
+
+            const wishlistContainer = document.getElementById('wishlist-container');
+            if (wishlistContainer.children.length === 0) {
+                emptyMessage.style.display = 'block';
+            }
+        } else {
+            throw new Error('Unexpected server response.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        icon.classList.toggle('filled');
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Could not update the wishlist. Please try again.',
+        });
+    }
+}
+
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Wishlist</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        h2 {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .product-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-card img {
+            border-radius: 8px;
+            max-height: 150px;
+            margin-bottom: 15px;
+        }
+
+        .product-card h5 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+
+        .product-card p {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #28a745;
+            margin: 10px 0;
+        }
+
+        .wishlist-btn {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 1.5rem;
+            color: #dc3545;
+            cursor: pointer;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .wishlist-btn:hover {
+            color: #bd2130;
+            transform: scale(1.2);
+        }
+
+        .wishlist-btn i.filled {
+            color: #dc3545;
+        }
+
+        .wishlist-empty {
+            font-size: 1.2rem;
+            text-align: center;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Your Wishlist</h2>
+        <div class="row">
+            {% for item in wishlist_items %}
+                <div class="col-md-4">
+                    <div class="product-card">
+                        <img src="{{ item.product.imageURL }}" alt="{{ item.product.name }}" class="img-fluid">
+                        <h5>{{ item.product.name }}</h5>
+                        <p>${{ item.product.price }}</p>
+                        <a href="javascript:void(0);" onclick="toggleWishlist({{ item.product.id }})" class="wishlist-btn" data-id="{{ item.product.id }}">
+                            <i class="fas fa-heart {% if item.product in user.wishlist_set.all %}filled{% endif %}"></i>
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <p class="wishlist-empty">Your wishlist is empty.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function toggleWishlist(productId) {
+            const icon = document.querySelector(`.wishlist-btn[data-id="${productId}"] i`);
+            
+            // Check if the product is already in the wishlist
+            const isFilled = icon.classList.contains('filled');
+            
+            // Immediately toggle the icon's state before the server response
+            if (isFilled) {
+                icon.classList.remove('filled');
+            } else {
+                icon.classList.add('filled');
+            }
+            
+            fetch(`/wishlist/toggle/${productId}/`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle server response and confirm the change
+                if (data.status === 'added' && !isFilled) {
+                    icon.classList.add('filled');
+                } else if (data.status === 'removed' && isFilled) {
+                    icon.classList.remove('filled');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Wishlist</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        h2 {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .product-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-card img {
+            border-radius: 8px;
+            max-height: 150px;
+            margin-bottom: 15px;
+        }
+
+        .product-card h5 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+
+        .product-card p {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #28a745;
+            margin: 10px 0;
+        }
+
+        .wishlist-btn {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 1.5rem;
+            color: #dc3545;
+            cursor: pointer;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .wishlist-btn:hover {
+            color: #bd2130;
+            transform: scale(1.2);
+        }
+
+        .wishlist-btn i.filled {
+            color: #dc3545;
+        }
+
+        .wishlist-empty {
+            font-size: 1.2rem;
+            text-align: center;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Your Wishlist</h2>
+        <div class="row">
+            {% for item in wishlist_items %}
+                <div class="col-md-4">
+                    <div class="product-card">
+                        <img src="{{ item.product.imageURL }}" alt="{{ item.product.name }}" class="img-fluid">
+                        <h5>{{ item.product.name }}</h5>
+                        <p>${{ item.product.price }}</p>
+                        <a href="javascript:void(0);" onclick="toggleWishlist({{ item.product.id }})" class="wishlist-btn" data-id="{{ item.product.id }}">
+                            <i class="fas fa-heart {% if item.product in user.wishlist_set.all %}filled{% endif %}"></i>
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <p class="wishlist-empty">Your wishlist is empty.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function toggleWishlist(productId) {
+            const icon = document.querySelector(`.wishlist-btn[data-id="${productId}"] i`);
+            
+            fetch(`/wishlist/toggle/${productId}/`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'added') {
+                    icon.classList.add('filled');
+                } else if (data.status === 'removed') {
+                    icon.classList.remove('filled');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Wishlist</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        h2 {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .product-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-card img {
+            border-radius: 8px;
+            max-height: 150px;
+            margin-bottom: 15px;
+        }
+
+        .product-card h5 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+
+        .product-card p {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #28a745;
+            margin: 10px 0;
+        }
+
+        .wishlist-btn {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 1.5rem;
+            color: #dc3545;
+            cursor: pointer;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .wishlist-btn:hover {
+            color: #bd2130;
+            transform: scale(1.2);
+        }
+
+        .wishlist-btn i.filled {
+            color: #dc3545;
+        }
+
+        .wishlist-empty {
+            font-size: 1.2rem;
+            text-align: center;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Your Wishlist</h2>
+        <div class="row">
+            {% for item in wishlist_items %}
+                <div class="col-md-4">
+                    <div class="product-card">
+                        <img src="{{ item.product.imageURL }}" alt="{{ item.product.name }}" class="img-fluid">
+                        <h5>{{ item.product.name }}</h5>
+                        <p>${{ item.product.price }}</p>
+                        <a href="javascript:void(0);" onclick="toggleWishlist({{ item.product.id }})" class="wishlist-btn">
+                            <i class="fas fa-heart {% if item.product in user.wishlist_set.all %}filled{% endif %}"></i>
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <p class="wishlist-empty">Your wishlist is empty.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function toggleWishlist(productId) {
+            fetch(`/wishlist/toggle/${productId}/`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                const icon = document.querySelector(`.wishlist-btn i[data-id='${productId}']`);
+                if (data.status === 'added') {
+                    icon.classList.add('filled');
+                } else if (data.status === 'removed') {
+                    icon.classList.remove('filled');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> -->
+
+
+
+
+
+
+
